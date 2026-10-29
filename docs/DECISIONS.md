@@ -66,3 +66,39 @@ continues. Newest entries at the bottom of each phase.
 12. **Portable Node 22 used for local validation only.** The dev machine had
     Node 20.16; a portable Node 22.23.4 was used to run lint/typecheck/tests/
     build locally. Not committed; no change to the user's system Node.
+
+## Phase 1 — Auth & tenancy
+
+13. **CI hardening (carried from the Phase 0 fix PR).** `gen:types` needs
+    `src/types/` to exist (added `.gitkeep`); `supabase start` excludes
+    `mailpit` (`-x mailpit`) to avoid an intermittent port 54324 bind failure.
+
+14. **Roles and statuses are Postgres enums, not lookup tables.** `farm_role`,
+    `member_status` and `invitation_status` are fixed sets the app logic and
+    RLS depend on; they are not farm-customisable, so enums (simpler, and
+    usable directly in policies) fit the spec's "enums or lookup tables".
+
+15. **`shed_assignments` deferred to Phase 2.** It carries a `shed_id` FK and
+    `sheds` does not exist until Phase 2. Worker shed-scoping is optional in the
+    spec, so the table (and its worker-scoping policies) land with `sheds`.
+
+16. **Onboarding and invite acceptance are SECURITY DEFINER RPCs.**
+    `create_farm()` and `accept_invitation()` must insert the first
+    `farm_members` row _before_ the caller is a member, which RLS would block.
+    One transaction each, `search_path = ''`, auth checked inside. Helper
+    functions `is_farm_member` / `has_farm_role` / `shares_farm_with` are also
+    SECURITY DEFINER so RLS policies can call them without recursing into RLS.
+
+17. **Profiles auto-created via `handle_new_user` trigger on `auth.users`.**
+    One profile per auth user; `full_name`/`phone` seeded from signup metadata.
+
+18. **`src/types/database.ts` still generated in CI only (Docker broken).**
+    The gen:types drift gate (`gen:types` + `git diff --exit-code`) promised
+    for Phase 1 is deferred until the file can be generated and committed from
+    a working local Supabase (or a CI commit step). CI still regenerates it so
+    typecheck/build run against the real schema.
+
+19. **RLS/role proofs run in pgTAP, not locally.** Tenant isolation and
+    per-role permissions are proven in `supabase/tests/10_tenancy_rls.test.sql`
+    using `set local role authenticated` + `request.jwt.claims`. Validated in
+    CI (`supabase test db`) because local Docker is unavailable on the dev box.

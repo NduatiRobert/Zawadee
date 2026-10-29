@@ -1,5 +1,7 @@
 -- Deterministic seed for local development and E2E/CI.
 -- Loaded by `supabase db reset`.
 --
--- Phase 1 adds two farms here so tenant isolation can be tested
--- (see docs/PROMPT.md, Testing strategy). Empty for Phase 0.
+-- Tenant-isolation fixtures (two farms + users) live inside the pgTAP test
+-- (supabase/tests/10_tenancy_rls.test.sql) so they roll back cleanly and the
+-- seed stays minimal. Seeded auth users for Playwright E2E will be added here
+-- alongside the auth UI (login/signup), once those flows exist to exercise.
