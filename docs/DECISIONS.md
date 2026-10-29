@@ -102,3 +102,58 @@ continues. Newest entries at the bottom of each phase.
     per-role permissions are proven in `supabase/tests/10_tenancy_rls.test.sql`
     using `set local role authenticated` + `request.jwt.claims`. Validated in
     CI (`supabase test db`) because local Docker is unavailable on the dev box.
+
+20. **UI primitives hand-rolled, not installed via the shadcn CLI.** The CLI is
+    interactive, needs network, and rewrites `globals.css` / Tailwind config —
+    which the Phase 0 scaffold already tuned for Tailwind v4 (CSS-first tokens,
+    light/dark). So `components/ui/{button,input,label,card}` are small
+    hand-written components using the existing CSS-variable tokens, with a
+    shadcn-compatible API. No stack change; no new deps (no `cva`/Radix yet).
+    Touch targets are ≥44px (`h-11`) for phone use. Revisit if a component needs
+    Radix behaviour (menus, dialogs) — add those via the CLI then.
+
+21. **`src/types/database.ts` is now committed and un-gitignored.** Local Docker
+    is still down, so the file is hand-maintained to match the applied
+    migrations, which unblocks typed Supabase clients and local `typecheck`. CI
+    still runs `gen:types` from the real schema before typecheck/build, so it
+    remains authoritative and catches drift. The formal drift gate (`gen:types`
+    - `git diff --exit-code`, decision 18) still waits on a working local
+      Supabase or a CI commit-back step.
+
+22. **Three Supabase clients.** `lib/supabase/server.ts` (request cookies, RLS,
+    for RSC/actions/handlers), `client.ts` (browser, anon), `admin.ts`
+    (service-role, bypasses RLS, `server-only` + `env`-guarded, used only where
+    the caller cannot yet act under RLS). The browser never talks to Supabase
+    directly — only Next → Supabase with the user's session.
+
+23. **`proxy.ts` does session refresh + the auth gate only.** It refreshes the
+    session (via `getUser()`, never `getSession()`) and redirects: signed-out →
+    `/login?redirect=…`, signed-in on an auth page → `/onboarding`. Per-farm
+    membership and slug resolution live in `(app)/[farmSlug]/layout.tsx`, which
+    returns `notFound()` for non-members (RLS already hides the rows — 404 so we
+    don't confirm a farm exists). This keeps the edge proxy free of DB lookups.
+
+24. **Dynamic authed routes opt into blocking with `export const instant =
+false`.** `next.config.ts` enables `cacheComponents` (Next 16). Every app
+    page is per-request authed (reads cookies + params), so prerendering a
+    static shell buys nothing; the framework's "block" option is simpler and
+    correct here. Reconsider per-route `<Suspense>` shells if a page gains a
+    cacheable static portion.
+
+25. **Auth email flows route through `/api/auth/callback`.** Signup confirmation
+    and password recovery links set `emailRedirectTo` to this handler, which
+    exchanges the `code` for a session then forwards to `next`. With local
+    confirmations off, `signUp` returns a session immediately and the form skips
+    the "check your email" step. `requestPasswordReset` never reveals whether an
+    email is registered.
+
+26. **`create_farm` slug derivation.** The onboarding form takes only a farm
+    name; the slug is derived server-side via `slugify()` (matches the DB check
+    constraint) and, on a unique-slug collision (`23505`), retried with `-2`…
+    `-5` suffixes before surfacing a friendly "name is taken" error.
+
+27. **Deferred within Phase 1 (follow-ups, not gaps in the DB layer).** Member
+    role-change and removal UI, farm-settings editing, and customised invite
+    emails are not built yet; the schema/RLS/RPCs already support them. The Team
+    page covers invite / list / revoke / accept, and Settings is read-only. These
+    land as small follow-ups before Phase 2 or alongside it.

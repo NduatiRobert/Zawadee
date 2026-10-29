@@ -46,8 +46,8 @@ yarn-error.log*
 supabase/.branches
 supabase/.temp
 
-# generated database types (regenerated via `pnpm gen:types`; committed from Phase 1)
-/src/types/database.ts
+# database types are committed from Phase 1 (hand-maintained where Docker is
+# unavailable; regenerated via `pnpm gen:types` in CI). See docs/DECISIONS.md.
 
 # typescript
 *.tsbuildinfo
