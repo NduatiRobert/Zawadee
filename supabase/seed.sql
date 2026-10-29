@@ -1,0 +1,5 @@
+-- Deterministic seed for local development and E2E/CI.
+-- Loaded by `supabase db reset`.
+--
+-- Phase 1 adds two farms here so tenant isolation can be tested
+-- (see docs/PROMPT.md, Testing strategy). Empty for Phase 0.
