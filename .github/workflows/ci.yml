@@ -41,7 +41,9 @@ jobs:
         run: pnpm test:coverage
 
       - name: Start local Supabase
-        run: pnpm supabase start
+        # Exclude mailpit (local SMTP inbox, port 54324): unused until Phase 1
+        # email flows, and its port bind has intermittently failed on CI runners.
+        run: pnpm supabase start -x mailpit
 
       - name: Reset database (apply migrations and seed)
         run: pnpm supabase db reset
