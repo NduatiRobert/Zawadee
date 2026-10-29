@@ -132,8 +132,8 @@ Currency KES, timezone Africa/Nairobi, date format DD/MM/YYYY, metric units. Spe
 
 ## Phase roadmap
 
-0. **Foundation** — scaffolding, tooling, CI, local Supabase, env validation, Vercel link, docs. _(current)_
-1. Auth & tenancy — signup/login/reset, profiles, farms, members, invites, roles, farm switcher, RLS helpers/policies, app shell.
+0. **Foundation** — scaffolding, tooling, CI, local Supabase, env validation, Vercel link, docs. _(done)_
+1. **Auth & tenancy** — signup/login/reset, profiles, farms, members, invites, roles, farm switcher, RLS helpers/policies, app shell. _(current)_
 2. Reference data, sheds, batches, animals, movements, mortality, shared DataTable/form.
 3. Parties, purchases, inventory, invoice numbering, PDF invoice.
 4. Feed, health (vaccines/treatments/withdrawal), production.

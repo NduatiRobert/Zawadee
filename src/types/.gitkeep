@@ -1,0 +1,2 @@
+# Keeps src/types/ in the repo so `pnpm gen:types` can write database.ts here.
+# The generated src/types/database.ts is gitignored (regenerated in CI).

@@ -4,8 +4,11 @@ Planning document for the data model. Tables are implemented as SQL migrations
 phase by phase (see `docs/PROMPT.md` → Phased delivery plan); this file is the
 agreed target and is kept in step with migrations as they land.
 
-> Status: **outline only** (Phase 0). No migrations exist yet. Phase 1
-> implements tenancy; later phases fill in the rest.
+> Status: **Phase 1 tenancy implemented** in migration
+> `20261029152058_tenancy.sql` (profiles, farms, farm_members, invitations,
+> farm_settings + helpers, audit, RLS, RPCs). `shed_assignments` is deferred
+> to Phase 2 (its `shed_id` FK needs the `sheds` table). Later phases fill in
+> the rest; the tables below remain the agreed target.
 
 ## Conventions
 
